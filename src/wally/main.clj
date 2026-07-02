@@ -481,6 +481,11 @@
   [& keys]
   (run! (fn [key] (.. (get-page) keyboard (press key))) keys))
 
+(defn keyboard-type
+  "Like `keyboard-press`, but accepts a single string and doesn't wait between key presses."
+  [text]
+  (.. (get-page) keyboard (type text)))
+
 (defn get-by-label
   "Locate a form control by associated label's text."
   [label]
