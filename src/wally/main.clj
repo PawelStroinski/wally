@@ -39,7 +39,7 @@
   (io/file ".wally/webdriver/data"))
 
 (defn- launch-persistent
-  ^Page [^BrowserType browser-type headless]
+  ^Page [^BrowserType browser-type headless launch-args]
   (io/make-parents user-data-dir)
   (-> browser-type
       (.launchPersistentContext
@@ -51,34 +51,43 @@
                         (.getAbsolutePath user-data-dir))))
        (-> (BrowserType$LaunchPersistentContextOptions.)
            (.setHeadless headless)
+           (.setArgs launch-args)
            (.setSlowMo 50)))
       .pages
       (first)))
 
 (defn- launch-non-persistent
-  ^Page [^BrowserType browser-type headless]
+  ^Page [^BrowserType browser-type headless launch-args]
   (-> browser-type
       (.launch
        (-> (BrowserType$LaunchOptions.)
            (.setHeadless headless)
+           (.setArgs launch-args)
            (.setSlowMo 50)))
       .newPage))
 
 (defonce ^:private page->playwright (atom {}))
 
 (defn make-page
+  "Launches Chromium and returns a Page. Options:
+  :headless - no browser window will be opened
+  :launch-args - pass command-line switches to Chromium, see:
+                 https://peter.sh/experiments/chromium-command-line-switches
+  :persistent - start Chromium with persistent data"
   (^Page
    []
    (make-page {}))
   (^Page
-   [{:keys [headless persistent]
+   [{:keys [headless launch-args persistent]
      :or {headless false
+          launch-args []
           persistent true}}]
    (delay
      (let [pw (Playwright/create)
            page ((if persistent launch-persistent launch-non-persistent)
                  (.chromium pw)
-                 headless)]
+                 headless
+                 launch-args)]
        (doto page
          (.setDefaultTimeout 10000)
          (#(swap! page->playwright assoc % pw))
