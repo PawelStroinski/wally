@@ -11,7 +11,7 @@
    (clojure.lang IFn)
    (com.microsoft.playwright BrowserType BrowserType$LaunchOptions
                              BrowserType$LaunchPersistentContextOptions
-                             Download Locator$ClickOptions Locator$DblclickOptions
+                             ConsoleMessage Download Locator$ClickOptions Locator$DblclickOptions
                              Page$ScreenshotOptions Locator$ScreenshotOptions
                              Locator$WaitForOptions Page Page$RouteOptions
                              Page$WaitForSelectorOptions Playwright Response Route
@@ -598,6 +598,17 @@
                                                       :css ScreenshotScale/CSS
                                                       :device ScreenshotScale/DEVICE))
                      timeout             (.setTimeout timeout)))))
+
+(defn start-console-log-capture
+  "Returns an atom to which page console logs will be captured."
+  []
+  (let [logs (atom [])]
+    (.onConsoleMessage
+     (get-page)
+     (fn [^ConsoleMessage message]
+       (swap! logs conj {:level (keyword (.type message))
+                         :text (.text message)})))
+    logs))
 
 (comment
 
