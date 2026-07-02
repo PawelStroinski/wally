@@ -16,7 +16,7 @@
                              Locator$WaitForOptions Page Page$RouteOptions
                              Page$WaitForSelectorOptions Playwright Response Route
                              TimeoutError)
-   (com.microsoft.playwright.options WaitForSelectorState SelectOption
+   (com.microsoft.playwright.options Cookie WaitForSelectorState SelectOption
                                      ScreenshotAnimations ScreenshotCaret
                                      ScreenshotScale ScreenshotType)
    (garden.selectors CSSSelector)
@@ -519,6 +519,22 @@
   []
   (grant-permissions :clipboard-read)
   (eval-js "() => navigator.clipboard.readText()"))
+
+(defn cookies-map
+  "Returns a map of cookie name keywords to cookie value strings.
+  Note that if multiple cookies were set with the same name, but with different
+  scope, the last one returned by the browser context wins in the returned map."
+  []
+  (into
+   {}
+   (map (fn [^Cookie cookie]
+          [(keyword (.-name cookie)) (.-value cookie)]))
+   (.cookies (.context (get-page)))))
+
+(defn clear-cookies!
+  "Removes all cookies from the browser context."
+  []
+  (.clearCookies (.context (get-page))))
 
 (defcommand take-page-screenshot
   "https://playwright.dev/java/docs/api/class-page#page-screenshot"
