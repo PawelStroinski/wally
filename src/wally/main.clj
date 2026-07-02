@@ -452,6 +452,11 @@
                       {:q q}))
       (first contents))))
 
+(defn html-content
+  "Returns the current full page HTML."
+  []
+  (.content (get-page)))
+
 (defn visible?
   [q]
   (.isVisible (-query q)))
